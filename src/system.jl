@@ -63,9 +63,6 @@ function evaluate(S::AbstractSystem{T1, M}, x::AbstractVector{T2}) where {T1, M,
 end
 evaluate(S::AbstractSystem, x::SVector) = Systems._evaluate(S, x)
 
-inline_evaluate(S::AbstractSystem, x::SVector) = Systems._inline_evaluate(S, x)
-
-
 """
     jacobian!(u, F::AbstractSystem, x)
 
@@ -173,21 +170,6 @@ module Systems
             @inline function _evaluate(system::$(name){T, N}, x::SVector{N, S}) where {T, S, N}
                 $(Expr(:block,
                     (:(@inbounds $(Symbol("u_", i)) = StaticPolynomials.evaluate(system.$(fs[i]), x)) for i in 1:n)...,
-                    :(SVector(
-                        $((Symbol("u_", i) for i=1:n)...)
-                    ))
-                ))
-            end
-
-            @inline function _inline_evaluate!(u::AbstractVector, S::$(name){T, N}, x::AbstractVector) where {T, N}
-                @boundscheck length(x) ≥ N
-                $(Expr(:block, [:(@inbounds u[$i] = StaticPolynomials.inline_evaluate(S.$(fs[i]), x)) for i in 1:n]...))
-                u
-            end
-
-            @inline function _inline_evaluate(system::$(name){T, N}, x::SVector{N, S}) where {T, S, N}
-                $(Expr(:block,
-                    (:(@inbounds $(Symbol("u_", i)) = StaticPolynomials.inline_evaluate(system.$(fs[i]), x)) for i in 1:n)...,
                     :(SVector(
                         $((Symbol("u_", i) for i=1:n)...)
                     ))

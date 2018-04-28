@@ -12,21 +12,6 @@ end
 
 function evaluate_impl(f::Type{Polynomial{T, NVars, E}}) where {T, NVars, E<:SExponents}
     quote
-        @boundscheck length(x) ≥ NVars
-        c = coefficients(f)
-        @inbounds out = begin
-            $(generate_evaluate(exponents(E, NVars), T))
-        end
-        out
-    end
-end
-
-@generated function inline_evaluate(f::Polynomial{T, NVars, E}, x::AbstractVector) where {T, NVars, E}
-    inline_evaluate_impl(f)
-end
-
-function inline_evaluate_impl(f::Type{Polynomial{T, NVars, E}}) where {T, NVars, E<:SExponents}
-    quote
         Base.@_inline_meta
         @boundscheck length(x) ≥ NVars
         c = coefficients(f)
@@ -94,6 +79,7 @@ end
 
 function _val_gradient_impl(f::Type{Polynomial{T, NVars, E}}) where {T, NVars, E<:SExponents}
     quote
+        Base.@_inline_meta
         @boundscheck length(x) ≥ NVars
         c = coefficients(f)
         @inbounds val, grad = begin

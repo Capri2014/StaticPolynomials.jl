@@ -180,15 +180,14 @@ module Systems
 
             @inline function _jacobian!(u::AbstractMatrix, F::$(name){T, N}, x::AbstractVector) where {T, N}
                 @boundscheck length(x) ≥ N
-                $(Expr(:block,
-                    (:(@inbounds $(Symbol("∇", i)) = StaticPolynomials._gradient(F.$(fs[i]), x)) for i in 1:n)...,
-                    quote
+                $((quote
+                        @inbounds $(Symbol("∇", i)) = StaticPolynomials._gradient(F.$(fs[i]), x)
                         for j=1:N
-                            $([:(u[$i, j] = $(Symbol("∇", i))[j]) for i in 1:n]...)
+                            u[$i, j] = $(Symbol("∇", i))[j]
                         end
                     end
-                ))
-
+                    for i in 1:n
+                    )...)
                 u
             end
 

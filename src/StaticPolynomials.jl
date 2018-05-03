@@ -25,6 +25,7 @@ module StaticPolynomials
     include("evaluate_codegen.jl")
     include("gradient_codegen.jl")
     include("evaluation.jl")
+    include("deboor.jl")
 
     include("system.jl")
 

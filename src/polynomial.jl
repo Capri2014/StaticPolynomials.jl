@@ -9,12 +9,38 @@ Construct a Polynomial from `f`.
 struct Polynomial{T, NVars, E<:SExponents}
     coefficients::Vector{T}
     variables::SVector{NVars, Symbol}
+    deboor_coefficients::Vector{T}
+    deboor_invperm::Vector{Int}
 
     function Polynomial{T, NVars, SExponents{E}}(coefficients::Vector{T}, variables::SVector{NVars, Symbol}) where {T, NVars, E}
         @assert length(coefficients) == div(length(E), NVars) "Coefficients size does not match exponents size"
-        new(coefficients, variables)
+        deboor_coefficients = coefficients[deboor_perm(exponents(SExponents{E}, NVars))]
+        new(coefficients, variables, deboor_coefficients)
     end
 end
+
+function deboor_perm(E)
+    exponents = [E[:,j] for j=1:size(E, 2)]
+    D = maximum(sum, exponents)
+    @show D
+    by_degree = [Vector{Vector{Int}}() for i=0:D]
+    coefficients = Dict{Vector{Int}, Int}()
+    for (i, e) in enumerate(exponents)
+        d = sum(e)
+        push!(by_degree[d + 1], e)
+        coefficients[e] = i
+    end
+
+    perm = Int[]
+    for d=D:-1:0
+        d_exponents = sort!(by_degree[d + 1], lt=lexless, rev=true)
+        for e in d_exponents
+            push!(perm, coefficients[e])
+        end
+    end
+    perm
+end
+
 
 function Polynomial(coefficients::Vector{T}, nvars, exponents::E, variables) where {T, E<:SExponents}
     return Polynomial{T, nvars, E}(coefficients, variables)

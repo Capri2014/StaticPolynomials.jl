@@ -1,6 +1,5 @@
 export Polynomial, coefficients, exponents, nvariables, coefficienttype
 
-
 """
     Polynomial(f::MP.AbstractPolynomial, [variables])
 
@@ -9,11 +8,6 @@ Construct a Polynomial from `f`.
 struct Polynomial{T, NVars, E<:SExponents}
     coefficients::Vector{T}
     variables::SVector{NVars, Symbol}
-
-    function Polynomial{T, NVars, SExponents{E}}(coefficients::Vector{T}, variables::SVector{NVars, Symbol}) where {T, NVars, E}
-        @assert length(coefficients) == div(length(E), NVars) "Coefficients size does not match exponents size"
-        new(coefficients, variables)
-    end
 end
 
 function Polynomial(coefficients::Vector{T}, nvars, exponents::E, variables) where {T, E<:SExponents}
@@ -27,7 +21,6 @@ function Polynomial(coefficients::Vector{T}, exponents::Matrix{<:Integer}, varia
     return Polynomial(coefficients[p], nvars, SExponents(E), variables)
 end
 
-# Implementation from Base.sort adapted to also reorder an associated vector
 """
     revlexicographic_cols(A, v)
 
